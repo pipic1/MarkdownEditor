@@ -1,0 +1,410 @@
+"use client";
+
+import { useState } from "react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import jsPDF from "jspdf";
+
+export default function Home() {
+  const [markdown, setMarkdown] = useState("");
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
+  const [viewMenuOpen, setViewMenuOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("split");
+  const [darkMode, setDarkMode] = useState(false);
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: markdown,
+    onUpdate: ({ editor }: { editor: any }) => {
+      setMarkdown(editor.getHTML());
+    },
+  });
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text(markdown, 10, 10);
+    doc.save("markdown.pdf");
+  };
+
+  const saveToFile = () => {
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "markdown.md";
+    link.click();
+  };
+
+  const copyMarkdown = () => {
+    navigator.clipboard.writeText(markdown);
+  };
+
+  const copyRenderedContent = () => {
+    navigator.clipboard.writeText(editor?.getHTML() || "");
+  };
+
+  const toggleBold = () => {
+    editor?.chain().focus().toggleBold().run();
+  };
+
+  const toggleItalic = () => {
+    editor?.chain().focus().toggleItalic().run();
+  };
+
+  const toggleUnderline = () => {
+    editor?.chain().focus().toggleUnderline().run();
+  };
+
+  const toggleStrike = () => {
+    editor?.chain().focus().toggleStrike().run();
+  };
+
+  const toggleLink = () => {
+    const previousUrl = editor?.getAttributes("link").href;
+    const url = prompt("Enter a URL", previousUrl);
+
+    if (url) {
+      editor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    } else {
+      editor?.chain().focus().unsetLink().run();
+    }
+  };
+
+  const toggleOrderedList = () => {
+    editor?.chain().focus().toggleOrderedList().run();
+  };
+
+  const toggleBulletList = () => {
+    editor?.chain().focus().toggleBulletList().run();
+  };
+
+  const toggleBlockquote = () => {
+    editor?.chain().focus().toggleBlockquote().run();
+  };
+
+  const toggleCode = () => {
+    editor?.chain().focus().toggleCodeBlock().run();
+  };
+
+  return (
+    <div className="min-h-screen">
+      <div className="flex flex-col gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
+          <div className=" bg-white flex align-middle gap-x-0.5 border-b border-gray-200 p-2 dark:bg-neutral-900 dark:border-neutral-700">
+            <div className="relative">
+              <button
+                className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                onClick={() => setFileMenuOpen(!fileMenuOpen)}
+              >
+                File
+              </button>
+              {fileMenuOpen && (
+                <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-neutral-800 dark:border-neutral-700">
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={exportToPDF}
+                  >
+                    Export to PDF
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={saveToFile}
+                  >
+                    Save Markdown
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={copyMarkdown}
+                  >
+                    Copy Markdown
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={copyRenderedContent}
+                  >
+                    Copy Rendered Content
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
+                className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                onClick={() => setViewMenuOpen(!viewMenuOpen)}
+              >
+                View
+              </button>
+              {viewMenuOpen && (
+                <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-neutral-800 dark:border-neutral-700">
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={() => setViewMode("split")}
+                  >
+                    Split View
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={() => setViewMode("markdown")}
+                  >
+                    Markdown View
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={() => setViewMode("final")}
+                  >
+                    Final Editable View
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-neutral-700"
+                    onClick={() => setDarkMode(!darkMode)}
+                  >
+                    Toggle Dark/Light Theme
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="sticky  bg-white flex align-middle gap-x-0.5 border-b border-gray-200 p-2 dark:bg-neutral-900 dark:border-neutral-700">
+            <button
+              title="Bold"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-bold=""
+              onClick={toggleBold}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14 12a4 4 0 0 0 0-8H6v8"></path>
+                <path d="M15 20a4 4 0 0 0 0-8H6v8Z"></path>
+              </svg>
+            </button>
+            <button
+              title="Italic"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-italic=""
+              onClick={toggleItalic}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="19" x2="10" y1="4" y2="4"></line>
+                <line x1="14" x2="5" y1="20" y2="20"></line>
+                <line x1="15" x2="9" y1="4" y2="20"></line>
+              </svg>
+            </button>
+            <button
+              title="Underline"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-underline=""
+              onClick={toggleUnderline}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 4v6a6 6 0 0 0 12 0V4"></path>
+                <line x1="4" x2="20" y1="20" y2="20"></line>
+              </svg>
+            </button>
+            <button
+              title="Strikethrough"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-strike=""
+              onClick={toggleStrike}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 4H9a3 3 0 0 0-2.83 4"></path>
+                <path d="M14 12a4 4 0 0 1 0 8H6"></path>
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+              </svg>
+            </button>
+            <button
+              title="Link"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-link=""
+              onClick={toggleLink}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </button>
+            <button
+              title="Ordered List"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-ol=""
+              onClick={toggleOrderedList}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="10" x2="21" y1="6" y2="6"></line>
+                <line x1="10" x2="21" y1="12" y2="12"></line>
+                <line x1="10" x2="21" y1="18" y2="18"></line>
+                <path d="M4 6h1v4"></path>
+                <path d="M4 10h2"></path>
+                <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+              </svg>
+            </button>
+            <button
+              title="Unordered List"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-ul=""
+              onClick={toggleBulletList}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="8" x2="21" y1="6" y2="6"></line>
+                <line x1="8" x2="21" y1="12" y2="12"></line>
+                <line x1="8" x2="21" y1="18" y2="18"></line>
+                <line x1="3" x2="3.01" y1="6" y2="6"></line>
+                <line x1="3" x2="3.01" y1="12" y2="12"></line>
+                <line x1="3" x2="3.01" y1="18" y2="18"></line>
+              </svg>
+            </button>
+            <button
+              title="Blockquote"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-blockquote=""
+              onClick={toggleBlockquote}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 6H3"></path>
+                <path d="M21 12H8"></path>
+                <path d="M21 18H8"></path>
+                <path d="M3 12v6"></path>
+              </svg>
+            </button>
+            <button
+              title="Code"
+              className="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              type="button"
+              data-hs-editor-code=""
+              onClick={toggleCode}
+            >
+              <svg
+                className="shrink-0 size-4"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m18 16 4-4-4-4"></path>
+                <path d="m6 8-4 4 4 4"></path>
+                <path d="m14.5 4-5 16"></path>
+              </svg>
+            </button>
+          </div>
+          <div className={`editor-container ${darkMode ? "dark" : ""}`}>
+            {viewMode === "split" && (
+              <div className="split-view">
+                <EditorContent editor={editor} className="h-40 overflow-auto" />
+                <div className="rendered-content">{editor?.getHTML()}</div>
+              </div>
+            )}
+            {viewMode === "markdown" && (
+              <textarea
+                className="markdown-view h-40 overflow-auto"
+                value={markdown}
+                readOnly
+                placeholder="Markdown content will appear here"
+              />
+            )}
+            {viewMode === "final" && (
+              <EditorContent editor={editor} className="h-40 overflow-auto" />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
