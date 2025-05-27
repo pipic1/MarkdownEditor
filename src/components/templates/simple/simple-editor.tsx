@@ -75,15 +75,57 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import content from "@/components/tiptap-templates/simple/data/content.json"
+import { saveAs } from 'file-saver';
+
+const handleExportToPDF = (editor: any) => {
+  const content = editor?.getHTML();
+  if (content) {
+    const pdfWindow = window.open('', '_blank');
+    pdfWindow?.document.write(content);
+    pdfWindow?.print();
+  }
+};
+
+const handleSaveMarkdown = (editor: any) => {
+  const markdown = editor?.getJSON();
+  if (markdown) {
+    const blob = new Blob([JSON.stringify(markdown, null, 2)], { type: 'application/json' });
+    saveAs(blob, 'content.md');
+  }
+};
+
+const handleCopyMarkdown = (editor: any) => {
+  const markdown = editor?.getJSON();
+  if (markdown) {
+    navigator.clipboard.writeText(JSON.stringify(markdown, null, 2));
+  }
+};
+
+const handleSaveHTML = (editor: any) => {
+  const html = editor?.getHTML();
+  if (html) {
+    const blob = new Blob([html], { type: 'text/html' });
+    saveAs(blob, 'content.html');
+  }
+};
+
+const handleCopyRenderedContent = (editor: any) => {
+  const html = editor?.getHTML();
+  if (html) {
+    navigator.clipboard.writeText(html);
+  }
+};
 
 const MainToolbarContent = ({
   onHighlighterClick,
   onLinkClick,
   isMobile,
+  editor
 }: {
   onHighlighterClick: () => void
   onLinkClick: () => void
   isMobile: boolean
+  editor: any
 }) => {
   return (
     <>
@@ -139,6 +181,16 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <ImageUploadButton text="Add" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <Button onClick={() => handleExportToPDF(editor)}>Export to PDF</Button>
+        <Button onClick={() => handleSaveMarkdown(editor)}>Save Markdown</Button>
+        <Button onClick={() => handleCopyMarkdown(editor)}>Copy Markdown</Button>
+        <Button onClick={() => handleSaveHTML(editor)}>Save HTML</Button>
+        <Button onClick={() => handleCopyRenderedContent(editor)}>Copy Rendered Content</Button>
       </ToolbarGroup>
 
       <Spacer />
@@ -249,6 +301,7 @@ export function SimpleEditor() {
             onHighlighterClick={() => setMobileView("highlighter")}
             onLinkClick={() => setMobileView("link")}
             isMobile={isMobile}
+            editor={editor}
           />
         ) : (
           <MobileToolbarContent
