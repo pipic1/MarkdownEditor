@@ -186,11 +186,21 @@ const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <Button onClick={() => handleExportToPDF(editor)}>Export to PDF</Button>
-        <Button onClick={() => handleSaveMarkdown(editor)}>Save Markdown</Button>
-        <Button onClick={() => handleCopyMarkdown(editor)}>Copy Markdown</Button>
-        <Button onClick={() => handleSaveHTML(editor)}>Save HTML</Button>
-        <Button onClick={() => handleCopyRenderedContent(editor)}>Copy Rendered Content</Button>
+        <Button type="button" onClick={() => handleExportToPDF(editor)}><span className="material-symbols-outlined">
+picture_as_pdf
+</span></Button>
+        <Button onClick={() => handleSaveMarkdown(editor)}><span className="material-symbols-outlined">
+markdown
+</span></Button>
+        <Button onClick={() => handleCopyMarkdown(editor)}><span className="material-symbols-outlined">
+markdown_copy
+</span></Button>
+        <Button onClick={() => handleSaveHTML(editor)}><span className="material-symbols-outlined">
+save
+</span></Button>
+        <Button onClick={() => handleCopyRenderedContent(editor)}><span className="material-symbols-outlined">
+content_copy
+</span></Button>
       </ToolbarGroup>
 
       <Spacer />
